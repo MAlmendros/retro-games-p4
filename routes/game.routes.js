@@ -3,22 +3,38 @@ const gameController = require('../controllers/game.controller');
 var express = require('express');
 var router = express.Router();
 
-// GET - Games ('/api/games')
-router.get('/', gameController.getGames);
+///////// Basic Rooms API Rest /////////
 
-// GET - Game ('/api/games/:id')
-router.get('/:id', gameController.getGame);
-
-// POST - Create game ('/api/games')
+/**
+ * POST - Create Game ('/api/games')
+ */
 router.post('/', gameController.createGame);
 
-// PUT - Update game ('/api/games')
+/**
+ * GET - Games ('/api/games')
+ */
+router.get('/', gameController.getGames);
+
+/**
+ * GET - Game by ID ('/api/games/:id')
+ */
+router.get('/:id', gameController.getGame);
+
+/**
+ * PUT - Update Game ('/api/games/:id')
+ */
 router.put('/:id', gameController.updateGame);
 
-// PUT - Conquer cell ('/api/games')
-router.put('/:id/conquer-cell', gameController.conquerCell);
-
-// DELETE - Delete game ('/api/games')
+/**
+ * DELETE - Delete Game ('/api/games/:id')
+ */
 router.delete('/:id', gameController.deleteGame);
+
+///////// Extended Rooms API Rest /////////
+
+/**
+ * PUT - Conquer Cell ('/api/games/:id/conquer-cell')
+ */
+router.put('/:id/conquer-cell', gameController.conquerCell);
 
 module.exports = router;
