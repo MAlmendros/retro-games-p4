@@ -1,39 +1,7 @@
 const { users } = require("../data/user.data");
 
 /**
- * GET - Users ('/api/users')
- * @param {*} request 
- * @param {*} response 
- */
-const getUsers = async(request, response) => {
-    response.status(200).json(users);
-}
-
-
-/**
- * GET - User by ID ('/api/users/:id')
- * @param {*} request 
- * @param {*} response 
- */
-const getUser = async(request, response) => {
-    const id = request.params.id;
-
-    const selectedUser = users.find((user) => user.id === parseInt(id));
-
-    if (selectedUser) {
-        response.status(200).json(selectedUser);
-    } else {
-        response
-            .status(404)
-            .json({
-                status: 404,
-                message: `El usuario no existe.`
-            });
-    }
-}
-
-/**
- * POST - Create user ('/api/users')
+ * POST - Create User ('/api/users')
  * @param {*} request 
  * @param {*} response 
  */
@@ -72,15 +40,47 @@ const createUser = async(request, response) => {
 }
 
 /**
- * PUT - Update user ('/api/users/:id')
+ * GET - Users ('/api/users')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const getUsers = async(request, response) => {
+    response.status(200).json(users);
+}
+
+
+/**
+ * GET - User by ID ('/api/users/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const getUser = async(request, response) => {
+    const id = request.params.id;
+
+    const selectedUser = users.find((user) => user.id === parseInt(id));
+
+    if (selectedUser) {
+        response.status(200).json(selectedUser);
+    } else {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `El usuario no existe.`
+            });
+    }
+}
+
+/**
+ * PUT - Update User ('/api/users/:id')
  * @param {*} request 
  * @param {*} response 
  */
 const updateUser = async(request, response) => {
-    const userId = request.params.id;
-    const updateValues = request.body;
+    const id = request.params.id;
+    let updateUser = request.body;
 
-    let selectedUser = users.find((user) => user.id === parseInt(userId));
+    let selectedUser = users.find((user) => user.id === parseInt(id));
 
     if (!selectedUser) {
         response
@@ -89,10 +89,17 @@ const updateUser = async(request, response) => {
                 status: 404,
                 message: `El usuario que desea actualizar no existe`,
             })
+    } else if (!updateUser || !updateUser.avatar || !updateUser.email || !updateUser.username || !updateUser.password) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `Falta algún dato para poder actualizar el usuario.`
+            });
     } else {
-        let updateUser = {
+        updateUser = {
             id: selectedUser.id,
-            ...updateValues,
+            ...updateUser,
             room: {},
         };
 
@@ -104,7 +111,7 @@ const updateUser = async(request, response) => {
 }
 
 /**
- * DELETE - Update user ('/api/users/:id')
+ * DELETE - Delete User ('/api/users/:id')
  * @param {*} request 
  * @param {*} response 
  */
@@ -160,7 +167,6 @@ const login = async(request, response) => {
 }
 
 ////////// Basic Users API Rest //////////
-
 module.exports.getUsers = getUsers;
 module.exports.getUser = getUser;
 module.exports.createUser = createUser;
@@ -168,5 +174,4 @@ module.exports.updateUser = updateUser;
 module.exports.deleteUser = deleteUser;
 
 ////////// Extended Users API Rest //////////
-
 module.exports.login = login;
