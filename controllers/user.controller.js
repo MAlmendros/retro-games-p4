@@ -116,9 +116,9 @@ const updateUser = async(request, response) => {
  * @param {*} response 
  */
 const deleteUser = async(request, response) => {
-    const userId = request.params.id;
+    const id = request.params.id;
 
-    let selectedUser = users.find((user) => user.id === parseInt(userId));
+    let selectedUser = users.find((user) => user.id === parseInt(id));
 
     if (!selectedUser) {
         response
@@ -167,9 +167,9 @@ const login = async(request, response) => {
 }
 
 ////////// Basic Users API Rest //////////
+module.exports.createUser = createUser;
 module.exports.getUsers = getUsers;
 module.exports.getUser = getUser;
-module.exports.createUser = createUser;
 module.exports.updateUser = updateUser;
 module.exports.deleteUser = deleteUser;
 

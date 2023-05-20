@@ -1,40 +1,12 @@
 
-const { cells } = require("../data/cell.data");
 const { games } = require("../data/game.data");
 const { rooms } = require("../data/room.data");
 
-const getGames = async(request, response) => {
-    response.status(200).json(games);
-}
-
-const getGame = async(request, response) => {
-    const gameId = request.params.id;
-
-    const selectedGame = games.find((game) => game.id === parseInt(gameId));
-
-    if (selectedGame) {
-        response.status(200).json(selectedGame);
-    } else {
-        const selectedRoom = rooms.find((room) => room.id === parseInt(gameId));
-
-        if (selectedRoom) {
-            response
-                .status(200)
-                .json({
-                    status: 200,
-                    message: `La sala está libre para jugar.`
-                })
-        } else {
-            response
-                .status(404)
-                .json({
-                    status: 404,
-                    message: `Ha ocurrido un error.`
-                });
-        }
-    }
-}
-
+/**
+ * POST - Create Game ('/api/games')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const createGame = async(request, response) => {
     const { roomId, userId } = request.body;
 
@@ -89,6 +61,53 @@ const createGame = async(request, response) => {
     }
 }
 
+/**
+ * GET - Games ('/api/games')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const getGames = async(request, response) => {
+    response.status(200).json(games);
+}
+
+/**
+ * GET - Game by ID ('/api/games/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const getGame = async(request, response) => {
+    const gameId = request.params.id;
+
+    const selectedGame = games.find((game) => game.id === parseInt(gameId));
+
+    if (selectedGame) {
+        response.status(200).json(selectedGame);
+    } else {
+        const selectedRoom = rooms.find((room) => room.id === parseInt(gameId));
+
+        if (selectedRoom) {
+            response
+                .status(200)
+                .json({
+                    status: 200,
+                    message: `La sala está libre para jugar.`
+                })
+        } else {
+            response
+                .status(404)
+                .json({
+                    status: 404,
+                    message: `Ha ocurrido un error.`
+                });
+        }
+    }
+}
+
+/**
+ * PUT - Update Game ('/api/games/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const updateGame = async(request, response) => {
     const gameId = request.params.id;
     const { roomId, userId } = request.body;
@@ -131,6 +150,72 @@ const updateGame = async(request, response) => {
     }
 }
 
+/**
+ * DELETE - Delete Game ('/api/games/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const deleteGame = async(request, response) => {
+    const gameId = request.params.id;
+    const { userId } = request.body;
+
+    const selectedGame = games.find((game) => game.id === parseInt(gameId));
+
+    if (!selectedGame) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `No existe ningún juego en curso en esa sala de juego.`
+            });
+    } else {
+        const iPlayer = selectedGame.players.findIndex((player) => player.id === userId);
+        const iRival = selectedGame.players.findIndex((player) => player.id !== userId);
+        const iGame = games.findIndex((game) => game.id === selectedGame.id);
+
+        if (iPlayer === -1 || iGame === -1) {
+            response
+                .status(404)
+                .json({
+                    status: 404,
+                    message: `Ha ocurrido un error inesperado.`
+                });
+        } else {
+            let updateGame = selectedGame;
+            updateGame.players[iPlayer] = {};
+
+            if (!updateGame.players[0].id && !updateGame.players[1].id) {
+                games.splice(iGame, 1);
+
+                response.status(200).json({
+                    status: 200,
+                    code: 'FINAL',
+                    message: `Todos los jugadores han abandonado la sala y el juego ha sido eliminado.`
+                });
+            } else {
+                updateGame.players[iRival] = {
+                    ...updateGame.players[iRival],
+                    cells: [],
+                    score: 0
+                };
+                games[iGame] = updateGame;
+
+                response.status(200).json({
+                    status: 200,
+                    code: 'LEAVE',
+                    game: updateGame
+                });
+            }
+        }
+    }
+}
+
+
+/**
+ * PUT - Conquer Cell ('/api/games/:id/conquer-cell')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const conquerCell = async(request, response) => {
     const gameId = request.params.id;
     const { userId, cellId } = request.body;
@@ -207,64 +292,12 @@ const conquerCell = async(request, response) => {
     }
 }
 
-const deleteGame = async(request, response) => {
-    const gameId = request.params.id;
-    const { userId } = request.body;
-
-    const selectedGame = games.find((game) => game.id === parseInt(gameId));
-
-    if (!selectedGame) {
-        response
-            .status(404)
-            .json({
-                status: 404,
-                message: `No existe ningún juego en curso en esa sala de juego.`
-            });
-    } else {
-        const iPlayer = selectedGame.players.findIndex((player) => player.id === userId);
-        const iRival = selectedGame.players.findIndex((player) => player.id !== userId);
-        const iGame = games.findIndex((game) => game.id === selectedGame.id);
-
-        if (iPlayer === -1 || iGame === -1) {
-            response
-                .status(404)
-                .json({
-                    status: 404,
-                    message: `Ha ocurrido un error inesperado.`
-                });
-        } else {
-            let updateGame = selectedGame;
-            updateGame.players[iPlayer] = {};
-
-            if (!updateGame.players[0].id && !updateGame.players[1].id) {
-                games.splice(iGame, 1);
-
-                response.status(200).json({
-                    status: 200,
-                    code: 'FINAL',
-                    message: `Todos los jugadores han abandonado la sala y el juego ha sido eliminado.`
-                });
-            } else {
-                updateGame.players[iRival] = {
-                    ...updateGame.players[iRival],
-                    cells: [],
-                    score: 0
-                };
-                games[iGame] = updateGame;
-
-                response.status(200).json({
-                    status: 200,
-                    code: 'LEAVE',
-                    game: updateGame
-                });
-            }
-        }
-    }
-}
-
+////////// Basic Users API Rest //////////
+module.exports.createGame = createGame;
 module.exports.getGames = getGames;
 module.exports.getGame = getGame;
-module.exports.createGame = createGame;
 module.exports.updateGame = updateGame;
 module.exports.deleteGame = deleteGame;
+
+////////// Extended Users API Rest //////////
 module.exports.conquerCell = conquerCell;

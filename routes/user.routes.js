@@ -6,6 +6,11 @@ var router = express.Router();
 ///////// Basic Users API Rest /////////
 
 /**
+ * POST - Create User ('/api/users')
+ */
+router.post('/', userController.createUser);
+
+/**
  * GET - Users ('/api/users')
  */
 router.get('/', userController.getUsers);
@@ -14,11 +19,6 @@ router.get('/', userController.getUsers);
  * GET - User by ID ('/api/users/:id')
  */ 
 router.get('/:id', userController.getUser);
-
-/**
- * POST - Create User ('/api/users')
- */
-router.post('/', userController.createUser);
 
 /**
  * PUT - Update User ('/api/users/:id')
