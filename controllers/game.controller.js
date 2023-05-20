@@ -124,7 +124,7 @@ const updateGame = async(request, response) => {
         };
 
 
-        let iGame = games.findIndex(game => game.id === selectedGame.id);
+        let iGame = games.findIndex((game) => game.id === selectedGame.id);
         games[iGame] = updateGame;
 
         response.status(200).json(updateGame);
@@ -192,7 +192,7 @@ const conquerCell = async(request, response) => {
                     score: selectedPlayer.score + 1
                 };
         
-                let iGame = games.findIndex(game => game.id === selectedGame.id);
+                let iGame = games.findIndex((game) => game.id === selectedGame.id);
                 games[iGame] = updateGame;
 
                 response
@@ -236,8 +236,6 @@ const deleteGame = async(request, response) => {
             let updateGame = selectedGame;
             updateGame.players[iPlayer] = {};
 
-            console.log(updateGame);
-            
             if (!updateGame.players[0].id && !updateGame.players[1].id) {
                 games.splice(iGame, 1);
 

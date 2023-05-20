@@ -147,7 +147,6 @@ document.getElementById('btn-leave').addEventListener('click', () => {
     })
     .then(data => data.json()) 
     .then(response => {
-        console.log(response);
         if (response.code && response.code === 'FINAL') {
             redirectTo();
         } else if (response.code && response.code === 'LEAVE') {
