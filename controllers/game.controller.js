@@ -1,12 +1,7 @@
 
-const { games } = require("../data/game.data");
-const { rooms } = require("../data/room.data");
+const { games } = require('../data/game.data');
+const { rooms } = require('../data/room.data');
 
-/**
- * POST - Create Game ('/api/games')
- * @param {*} request 
- * @param {*} response 
- */
 const createGame = async(request, response) => {
     const { roomId, userId } = request.body;
 
@@ -61,20 +56,10 @@ const createGame = async(request, response) => {
     }
 }
 
-/**
- * GET - Games ('/api/games')
- * @param {*} request 
- * @param {*} response 
- */
 const getGames = async(request, response) => {
     response.status(200).json(games);
 }
 
-/**
- * GET - Game by ID ('/api/games/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const getGame = async(request, response) => {
     const gameId = request.params.id;
 
@@ -103,11 +88,6 @@ const getGame = async(request, response) => {
     }
 }
 
-/**
- * PUT - Update Game ('/api/games/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const updateGame = async(request, response) => {
     const gameId = request.params.id;
     const { roomId, userId } = request.body;
@@ -150,11 +130,6 @@ const updateGame = async(request, response) => {
     }
 }
 
-/**
- * DELETE - Delete Game ('/api/games/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const deleteGame = async(request, response) => {
     const gameId = request.params.id;
     const { userId } = request.body;
@@ -211,11 +186,6 @@ const deleteGame = async(request, response) => {
 }
 
 
-/**
- * PUT - Conquer Cell ('/api/games/:id/conquer-cell')
- * @param {*} request 
- * @param {*} response 
- */
 const conquerCell = async(request, response) => {
     const gameId = request.params.id;
     const { userId, cellId } = request.body;

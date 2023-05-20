@@ -1,11 +1,6 @@
-const { rooms } = require("../data/room.data");
-const { users } = require("../data/user.data");
+const { rooms } = require('../data/room.data');
+const { users } = require('../data/user.data');
 
-/**
- * POST - Create Room ('/api/rooms')
- * @param {*} request 
- * @param {*} response 
- */
 const createRoom = async(request, response) => {
     let newRoom = request.body;
 
@@ -41,20 +36,10 @@ const createRoom = async(request, response) => {
     }
 }
 
-/**
- * GET - Rooms ('/api/rooms')
- * @param {*} request 
- * @param {*} response 
- */
 const getRooms = async(request, response) => {
     response.status(200).json(rooms);
 }
 
-/**
- * GET - Room by ID ('/api/rooms/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const getRoom = async(request, response) => {
     const id = request.params.id;
 
@@ -72,11 +57,6 @@ const getRoom = async(request, response) => {
     }
 }
 
-/**
- * PUT - Update Room ('/api/rooms/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const updateRoom = async(request, response) => {
     const id = request.params.id;
     let updateRoom = request.body;
@@ -112,11 +92,6 @@ const updateRoom = async(request, response) => {
     }
 }
 
-/**
- * DELETE - Delete Room ('/api/rooms/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const deleteRoom = async(request, response) => {
     const id = request.params.id;
 
@@ -137,11 +112,6 @@ const deleteRoom = async(request, response) => {
     }
 }
 
-/**
- * PUT - Add Player ('/api/rooms/add-player')
- * @param {*} request 
- * @param {*} response 
- */
 const addPlayer = async(request, response) => {
     const { roomId, userId } = request.body;
 
@@ -202,11 +172,6 @@ const addPlayer = async(request, response) => {
     }
 }
 
-/**
- * PUT - Remove Player ('/api/rooms/remove-player')
- * @param {*} request 
- * @param {*} response 
- */
 const removePlayer = async(request, response) => {
     const { roomId, userId } = request.body;
 

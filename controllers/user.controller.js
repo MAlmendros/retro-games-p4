@@ -1,10 +1,5 @@
-const { users } = require("../data/user.data");
+const { users } = require('../data/user.data');
 
-/**
- * POST - Create User ('/api/users')
- * @param {*} request 
- * @param {*} response 
- */
 const createUser = async(request, response) => {
     let newUser = request.body;
 
@@ -39,21 +34,10 @@ const createUser = async(request, response) => {
     }
 }
 
-/**
- * GET - Users ('/api/users')
- * @param {*} request 
- * @param {*} response 
- */
 const getUsers = async(request, response) => {
     response.status(200).json(users);
 }
 
-
-/**
- * GET - User by ID ('/api/users/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const getUser = async(request, response) => {
     const id = request.params.id;
 
@@ -71,11 +55,6 @@ const getUser = async(request, response) => {
     }
 }
 
-/**
- * PUT - Update User ('/api/users/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const updateUser = async(request, response) => {
     const id = request.params.id;
     let updateUser = request.body;
@@ -110,11 +89,6 @@ const updateUser = async(request, response) => {
     }
 }
 
-/**
- * DELETE - Delete User ('/api/users/:id')
- * @param {*} request 
- * @param {*} response 
- */
 const deleteUser = async(request, response) => {
     const id = request.params.id;
 
@@ -135,11 +109,6 @@ const deleteUser = async(request, response) => {
     }
 }
 
-/**
- * POST - Login ('/api/users/login')
- * @param {*} request 
- * @param {*} response 
- */
 const login = async(request, response) => {
     const userData = request.body;
 
