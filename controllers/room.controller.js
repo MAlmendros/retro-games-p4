@@ -1,10 +1,60 @@
 const { rooms } = require("../data/room.data");
 const { users } = require("../data/user.data");
 
+/**
+ * POST - Create Room ('/api/rooms')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const createRoom = async(request, response) => {
+    let newRoom = request.body;
+
+    let selectedRoom = rooms.find((room) => room.name === newRoom.name);
+
+    if (selectedRoom) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `Ya existe una sala de juego con este nombre.`
+            });
+    } else if (!newRoom || !newRoom.name) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `Rellene todos los datos.`
+            });
+    } else {
+        const ids = rooms.map((room) => room.id);
+        let id = Math.max(...ids) + 1;
+
+        newRoom = {
+            id,
+            ...newRoom,
+            limit: 2,
+            players: []
+        };
+        rooms.push(newRoom);
+
+        response.status(200).json(newRoom);
+    }
+}
+
+/**
+ * GET - Rooms ('/api/rooms')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const getRooms = async(request, response) => {
     response.status(200).json(rooms);
 }
 
+/**
+ * GET - Room by ID ('/api/rooms/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const getRoom = async(request, response) => {
     const id = request.params.id;
 
@@ -22,6 +72,76 @@ const getRoom = async(request, response) => {
     }
 }
 
+/**
+ * PUT - Update Room ('/api/rooms/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const updateRoom = async(request, response) => {
+    const id = request.params.id;
+    let updateRoom = request.body;
+
+    let selectedRoom = rooms.find((room) => room.id === parseInt(id));
+
+    if (!selectedRoom) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `La sala de juego que desea actualizar no existe`,
+            })
+    } else if (!updateRoom || !updateRoom.name) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `Falta algún dato para poder actualizar la sala de juego.`
+            });
+    } else {
+        updateRoom = {
+            id: selectedRoom.id,
+            ...updateRoom,
+            limit: 2,
+            players: [],
+        };
+
+        const iRoom = rooms.findIndex((room) => room.id === selectedRoom.id);
+        rooms[iRoom] = updateRoom;
+
+        response.status(200).json(updateRoom);
+    }
+}
+
+/**
+ * DELETE - Delete Room ('/api/rooms/:id')
+ * @param {*} request 
+ * @param {*} response 
+ */
+const deleteRoom = async(request, response) => {
+    const id = request.params.id;
+
+    let selectedRoom = rooms.find((room) => room.id === parseInt(id));
+
+    if (!selectedRoom) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `El usuario que desea eliminar no existe`,
+            })
+    } else {
+        const iRoom = rooms.findIndex((room) => room.id === selectedRoom.id);
+        rooms.splice(iRoom, 1);
+
+        response.status(200).json(selectedRoom);
+    }
+}
+
+/**
+ * PUT - Add Player ('/api/rooms/add-player')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const addPlayer = async(request, response) => {
     const { roomId, userId } = request.body;
 
@@ -82,6 +202,11 @@ const addPlayer = async(request, response) => {
     }
 }
 
+/**
+ * PUT - Remove Player ('/api/rooms/remove-player')
+ * @param {*} request 
+ * @param {*} response 
+ */
 const removePlayer = async(request, response) => {
     const { roomId, userId } = request.body;
 
@@ -104,7 +229,13 @@ const removePlayer = async(request, response) => {
     }
 }
 
+////////// Basic Users API Rest //////////
+module.exports.createRoom = createRoom;
 module.exports.getRooms = getRooms;
 module.exports.getRoom = getRoom;
+module.exports.updateRoom = updateRoom;
+module.exports.deleteRoom = deleteRoom;
+
+////////// Extended Users API Rest //////////
 module.exports.addPlayer = addPlayer;
 module.exports.removePlayer = removePlayer;

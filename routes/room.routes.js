@@ -1,19 +1,45 @@
-
 const roomController = require('../controllers/room.controller');
 
 var express = require('express');
 var router = express.Router();
 
-// GET - Rooms ('/api/rooms')
+///////// Basic Rooms API Rest /////////
+
+/**
+ * POST - Create Room ('/api/rooms')
+ */
+router.post('/', roomController.createRoom);
+
+/**
+ * GET - Rooms ('/api/rooms')
+ */
 router.get('/', roomController.getRooms);
 
-// GET - Room ('/api/rooms/:id')
+/**
+ * GET - Room by ID ('/api/rooms/:id')
+ */
 router.get('/:id', roomController.getRoom);
 
-// POST - Add player ('/api/rooms/add-player')
-router.post('/add-player', roomController.addPlayer);
+/**
+ * PUT - Update Room ('/api/rooms/:id')
+ */
+router.put('/:id', roomController.updateRoom);
 
-// POST - Remove player ('/api/rooms/remove-player')
-router.post('/remove-player', roomController.removePlayer);
+/**
+ * DELETE - Delete Room ('/api/rooms/:id')
+ */
+router.delete('/:id', roomController.deleteRoom);
+
+///////// Extended Rooms API Rest /////////
+
+/**
+ * PUT - Add Player ('/api/rooms/add-player')
+ */
+router.put('/add-player', roomController.addPlayer);
+
+/**
+ * PUT - Remove Player ('/api/rooms/remove-player')
+ */
+router.put('/remove-player', roomController.removePlayer);
 
 module.exports = router;
