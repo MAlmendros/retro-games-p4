@@ -1,9 +1,10 @@
+const { User } = require('../models/user.model');
 const { users } = require('../data/user.data');
 
 const createUser = async(request, response) => {
-    let newUser = request.body;
+    const body = request.body;
 
-    let selectedUser = users.find((user) => user.email === newUser.email);
+    const selectedUser = await User.findOne({ email: body.email });
 
     if (selectedUser) {
         response
@@ -12,7 +13,7 @@ const createUser = async(request, response) => {
                 status: 404,
                 message: `Este correo electrónico ya está registrado.`
             });
-    } else if (!newUser || !newUser.avatar || !newUser.email || !newUser.username || !newUser.password) {
+    } else if (!body || !body.avatar || !body.email || !body.username || !body.password) {
         response
             .status(404)
             .json({
@@ -20,55 +21,75 @@ const createUser = async(request, response) => {
                 message: `Rellene todos los datos.`
             });
     } else {
+        const users = await User.find();
         const ids = users.map((user) => user.id);
-        let id = Math.max(...ids) + 1;
+        const id = ids.length ? Math.max(...ids) + 1 : 1;
+        
+        try {
+            let user = new User({
+                id: id ? id : 1,
+                username: body.username,
+                email: body.email,
+                password: body.password,
+                avatar: body.avatar,
+                room: null
+            });
 
-        newUser = {
-            id,
-            ...newUser,
-            room: {}
-        };
-        users.push(newUser);
-
-        response.status(200).json(newUser);
+            await user.save();
+            response.status(200).json(user);
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 
 const getUsers = async(request, response) => {
-    response.status(200).json(users);
+    try {
+        const users = await User.find();
+        response.status(200).json(users);
+    } catch (error) {
+        response
+            .status(404)
+            .json({ status: 404, message: `Ha ocurrido un error.` });
+    }
 }
 
 const getUser = async(request, response) => {
     const id = request.params.id;
 
-    const selectedUser = users.find((user) => user.id === parseInt(id));
+    try {
+        const user = await User.findOne({ id });
 
-    if (selectedUser) {
-        response.status(200).json(selectedUser);
-    } else {
+        if (!user) {
+            response
+                .status(404)
+                .json({ status: 404, message: `El usuario no existe.` });
+        } else {
+            response.status(200).json(user);
+        }
+    } catch (error) {
         response
             .status(404)
-            .json({
-                status: 404,
-                message: `El usuario no existe.`
-            });
+            .json({ status: 404, message: `Ha ocurrido un error.` });
     }
 }
 
 const updateUser = async(request, response) => {
     const id = request.params.id;
-    let updateUser = request.body;
+    let body = request.body;
 
-    let selectedUser = users.find((user) => user.id === parseInt(id));
+    const user = await User.findOne({ id });
 
-    if (!selectedUser) {
+    if (!user) {
         response
             .status(404)
             .json({
                 status: 404,
                 message: `El usuario que desea actualizar no existe`,
             })
-    } else if (!updateUser || !updateUser.avatar || !updateUser.email || !updateUser.username || !updateUser.password) {
+    } else if (!body || !body.avatar || !body.email || !body.username || !body.password) {
         response
             .status(404)
             .json({
@@ -76,25 +97,29 @@ const updateUser = async(request, response) => {
                 message: `Falta algún dato para poder actualizar el usuario.`
             });
     } else {
-        updateUser = {
-            id: selectedUser.id,
-            ...updateUser,
-            room: {},
-        };
+        try {
+            const updateValues = {
+                id,
+                ...body,
+                room: null,
+            };
 
-        const iUser = users.findIndex((user) => user.id === selectedUser.id);
-        users[iUser] = updateUser;
-
-        response.status(200).json(updateUser);
+            const updateUser = await User.findOneAndUpdate({ id }, updateValues, { new: true });
+            response.status(200).json(updateUser);
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 
 const deleteUser = async(request, response) => {
     const id = request.params.id;
 
-    let selectedUser = users.find((user) => user.id === parseInt(id));
+    const user = await User.findOne({ id });
 
-    if (!selectedUser) {
+    if (!user) {
         response
             .status(404)
             .json({
@@ -102,17 +127,21 @@ const deleteUser = async(request, response) => {
                 message: `El usuario que desea eliminar no existe`,
             })
     } else {
-        const iUser = users.findIndex((user) => user.id === selectedUser.id);
-        users.splice(iUser, 1);
-
-        response.status(200).json(selectedUser);
+        try {
+            await User.deleteOne({ id });
+            response.status(200).json(user);
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 
 const login = async(request, response) => {
-    const userData = request.body;
+    const body = request.body;
 
-    if (!userData || !userData.email || !userData.password) {
+    if (!body || !body.email || !body.password) {
         response
             .status(404)
             .json({
@@ -120,17 +149,23 @@ const login = async(request, response) => {
                 message: `Rellene todos los datos.`
             });
     } else {
-        let selectedUser = users.find((user) => user.email === userData.email && user.password === userData.password);
+        const user = await User.findOne({ email: body.email, password: body.password });
 
-        if (!selectedUser) {
+        if (!user) {
             response
                 .status(404)
                 .json({
                     status: 404,
-                    message: `El usuario con correo electrónico "${userData.email}" no existe o la contraseña es incorrecta.`
+                    message: `El usuario con correo electrónico "${body.email}" no existe o la contraseña es incorrecta.`
                 });
         } else {
-            response.status(200).json(selectedUser);
+            try {
+                response.status(200).json(user);
+            } catch (error) {
+                response
+                    .status(404)
+                    .json({ status: 404, message: `Ha ocurrido un error.` });
+            }
         }
     }
 }
