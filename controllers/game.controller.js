@@ -37,7 +37,7 @@ const createGame = async(request, response) => {
                 .status(404)
                 .json({
                     status: 404,
-                    message: `El usuario no existe, revise sus credenciales`
+                    message: `El usuario no existe, revise sus credenciales.`
                 });
         } else {
             newGame.players[iPlayer] = {
@@ -223,14 +223,14 @@ const conquerCell = async(request, response) => {
                     .status(404)
                     .json({
                         status: 404,
-                        message: `Esta celda ya ha sido conquistada por otro jugador`
+                        message: `Esta celda ya ha sido conquistada por otro jugador.`
                     });
             } else if (controlPlayer) {
                 response
                     .status(404)
                     .json({
                         status: 404,
-                        message: `Esta celda ya ha sido conquistada por otro jugador`
+                        message: `Esta celda ya ha sido conquistada por otro jugador.`
                     });
             } else if (!(controlLength || controlAdjacent)) {
                 response

@@ -1,10 +1,13 @@
+const { Room } = require('../models/room.model');
+const { User } = require('../models/user.model');
+
 const { rooms } = require('../data/room.data');
 const { users } = require('../data/user.data');
 
 const createRoom = async(request, response) => {
-    let newRoom = request.body;
+    const body = request.body;
 
-    let selectedRoom = rooms.find((room) => room.name === newRoom.name);
+    const selectedRoom = await Room.findOne({ name: body.name });
 
     if (selectedRoom) {
         response
@@ -13,7 +16,7 @@ const createRoom = async(request, response) => {
                 status: 404,
                 message: `Ya existe una sala de juego con este nombre.`
             });
-    } else if (!newRoom || !newRoom.name) {
+    } else if (!body || !body.name) {
         response
             .status(404)
             .json({
@@ -21,56 +24,88 @@ const createRoom = async(request, response) => {
                 message: `Rellene todos los datos.`
             });
     } else {
+        const rooms = await Room.find();
         const ids = rooms.map((room) => room.id);
-        let id = Math.max(...ids) + 1;
+        let id = ids.length ? Math.max(...ids) + 1 : 1;
 
-        newRoom = {
-            id,
-            ...newRoom,
-            limit: 2,
-            players: []
-        };
-        rooms.push(newRoom);
+        try {
+            let room = new Room({
+                id,
+                name: body.name,
+                limit: 2
+            });
 
-        response.status(200).json(newRoom);
+            await room.save();
+
+            response.status(200).json({ ...room._doc, players: [] });
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 
 const getRooms = async(request, response) => {
-    response.status(200).json(rooms);
+    try {
+        const rooms = await Room.find();
+        let returnRooms = [];
+
+        for (const room of rooms) {
+            const users = await User.find({ room: room.id });
+            const players = users && users.length ? users : [];
+
+            returnRooms.push({ ...room._doc, players });
+        }
+
+        response.status(200).json(returnRooms);
+    } catch (error) {
+        response
+            .status(404)
+            .json({ status: 404, message: `Ha ocurrido un error.` });
+    }
 }
 
 const getRoom = async(request, response) => {
     const id = request.params.id;
 
-    const selectedRoom = rooms.find((room) => room.id === parseInt(id));
+    try {
+        const room = await Room.findOne({ id });
 
-    if (selectedRoom) {
-        response.status(200).json(selectedRoom);
-    } else {
+        if (!room) {
+            response
+                .status(404)
+                .json({
+                    status: 404,
+                    message: `La sala de juego no existe.`
+                });
+        } else {
+            const users = await User.find({ room: room.id });
+            const players = users && users.length ? users : [];
+
+            response.status(200).json({ ...room._doc, players });
+        }
+    } catch (error) {
         response
             .status(404)
-            .json({
-                status: 404,
-                message: `La sala de juego no existe.`
-            });
+            .json({ status: 404, message: `Ha ocurrido un error.` });
     }
 }
 
 const updateRoom = async(request, response) => {
     const id = request.params.id;
-    let updateRoom = request.body;
+    const body = request.body;
 
-    let selectedRoom = rooms.find((room) => room.id === parseInt(id));
+    const room = await Room.findOne({ id });
 
-    if (!selectedRoom) {
+    if (!room) {
         response
             .status(404)
             .json({
                 status: 404,
-                message: `La sala de juego que desea actualizar no existe`,
+                message: `La sala de juego que desea actualizar no existe.`,
             })
-    } else if (!updateRoom || !updateRoom.name) {
+    } else if (!body || !body.name) {
         response
             .status(404)
             .json({
@@ -78,54 +113,70 @@ const updateRoom = async(request, response) => {
                 message: `Falta algún dato para poder actualizar la sala de juego.`
             });
     } else {
-        updateRoom = {
-            id: selectedRoom.id,
-            ...updateRoom,
-            limit: 2,
-            players: [],
-        };
+        try {
+            const updateValues = {
+                id,
+                ...body,
+                limit: 2,
+            };
+    
+            const updateRoom = await Room.findOneAndUpdate({ id }, updateValues, { new: true });
+            const users = await User.find({ room: updateRoom.id });
+            const players = users && users.length ? users : [];
 
-        const iRoom = rooms.findIndex((room) => room.id === selectedRoom.id);
-        rooms[iRoom] = updateRoom;
-
-        response.status(200).json(updateRoom);
+            response.status(200).json({ ...updateRoom._doc, players });
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 
 const deleteRoom = async(request, response) => {
     const id = request.params.id;
 
-    let selectedRoom = rooms.find((room) => room.id === parseInt(id));
+    const room = await Room.findOne({ id });
 
-    if (!selectedRoom) {
+    if (!room) {
         response
             .status(404)
             .json({
                 status: 404,
-                message: `El usuario que desea eliminar no existe`,
+                message: `La sala de juego que desea eliminar no existe.`,
             })
     } else {
-        const iRoom = rooms.findIndex((room) => room.id === selectedRoom.id);
-        rooms.splice(iRoom, 1);
+        try {
+            const users = await User.find({ room: room.id });
+            const players = users && users.length ? users : [];
+            const deleteRoom = { ...room._doc, players };
 
-        response.status(200).json(selectedRoom);
+            await User.updateMany({ room: room.id }, { room: 0 }, { new: true });
+            await Room.deleteOne({ id });
+
+            response.status(200).json(deleteRoom);
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 
 const addPlayer = async(request, response) => {
     const { roomId, userId } = request.body;
 
-    let selectedRoom = rooms.find((room) => room.id === parseInt(roomId));
-    let selectedUser = users.find((user) => user.id === parseInt(userId));
+    const room = await Room.findOne({ id: roomId });
+    const user = await User.findOne({ id: userId });
 
-    if (!selectedRoom) {
+    if (!room) {
         response
             .status(404)
             .json({
                 status: 404,
                 message: `La sala de juego no existe.`
             });
-    } else if (!selectedUser) {
+    } else if (!user) {
         response
             .status(404)
             .json({
@@ -133,41 +184,38 @@ const addPlayer = async(request, response) => {
                 message: `El usuario no existe.`
             });
     } else {
-        let selectedPlayer = selectedRoom.players.find((player) => player.id === selectedUser.id);
-
-        let otherRoomUser = false;
-        rooms.forEach(room => {
-            const onRoom = room.players.find((player) => player.id === selectedUser.id);
-            if (onRoom) {
-                otherRoomUser = true;
-            }
-        });
-
-        if (selectedPlayer) {
+        if (user.room) {
+            const message = user.room === room.id
+                ? `El usuario "${user.username}" ya está en la sala "${room.name}".`
+                : `El usuario "${user.username}" ya está en otra sala.`;
             response
                 .status(404)
-                .json({
-                    status: 404,
-                    message: `El usuario "${selectedUser.username}" ya está en la sala "${selectedRoom.name}".`
-                });
-        } else if (!selectedPlayer && otherRoomUser) {
-            response
-                .status(404)
-                .json({
-                    status: 404,
-                    message: `El usuario "${selectedUser.username}" ya está en otra sala.`
-                });
-        } else if (selectedRoom.limit <= selectedRoom.players.length) {
-            response
-                .status(404)
-                .json({
-                    status: 404,
-                    message: `La sala "${selectedRoom.name}" está llena.`
-                });
+                .json({ status: 404, message });
         } else {
-            selectedRoom.players.push(selectedUser);
+            let users = await User.find({ room: room.id });
+            let players = users && users.length ? users : []; 
 
-            response.status(200).json(selectedRoom);
+            if (room.limit <= players.length) {
+                response
+                    .status(404)
+                    .json({
+                        status: 404,
+                        message: `La sala "${room.name}" está llena.`
+                    });
+            } else {
+                try {
+                    await User.findOneAndUpdate({ id: userId }, { room: room.id }, { new: true });
+
+                    users = await User.find({ room: room.id });
+                    players = users && users.length ? users : [];
+
+                    response.status(200).json({ ...room._doc, players });
+                } catch (error) {
+                    response
+                        .status(404)
+                        .json({ status: 404, message: `Ha ocurrido un error.` });
+                }
+            }
         }
     }
 }
@@ -175,22 +223,43 @@ const addPlayer = async(request, response) => {
 const removePlayer = async(request, response) => {
     const { roomId, userId } = request.body;
 
-    let selectedRoom = rooms.find((room) => room.id === parseInt(roomId));
-    let selectedUser = users.find((user) => user.id === parseInt(userId));
+    const room = await Room.findOne({ id: roomId });
+    const user = await User.findOne({ id: userId });
 
-    if (!selectedRoom) {
+    if (!room) {
         response
             .status(404)
-            .json({ message: `La sala no existe.` });
-    } else if (!selectedUser) {
+            .json({
+                status: 404,
+                message: `La sala no existe.`
+            });
+    } else if (!user) {
         response
             .status(404)
-            .json({ message: `El usuario no existe.` });
+            .json({
+                status: 404,
+                message: `El usuario no existe.`
+            });
+    } else if (!user.room || user.room !== room.id) {
+        response
+            .status(404)
+            .json({
+                status: 404,
+                message: `El usuario no se encuentra en esta sala de juego.`
+            });
     } else {
-        let newPlayers = selectedRoom.players.filter((player) => player.id !== selectedUser.id);
-        selectedRoom.players = newPlayers;
+        try {
+            await User.findOneAndUpdate({ id: userId }, { room: 0 }, { new: true });
 
-        response.status(200).json(selectedRoom);
+            const users = await User.find({ room: room.id });
+            const players = users && users.length ? users : [];
+
+            response.status(200).json({ ...room._doc, players });
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
+        }
     }
 }
 

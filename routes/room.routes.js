@@ -230,7 +230,7 @@ router.delete('/:id', roomController.deleteRoom);
 /**
  * @swagger
  * /api/rooms/add-player:
- *   put:
+ *   post:
  *     tags:
  *       - Salas de juego
  *     summary: Añadir jugador a la sala de juego.
@@ -275,12 +275,12 @@ router.delete('/:id', roomController.deleteRoom);
  *                   description: Jugadores dentro de la sala de juego.
  *                   example: {}
  */
-router.put('/add-player', roomController.addPlayer);
+router.post('/add-player', roomController.addPlayer);
 
 /**
  * @swagger
  * /api/rooms/remove-player:
- *   put:
+ *   post:
  *     tags:
  *       - Salas de juego
  *     summary: Eliminar jugador de la sala de juego.
@@ -325,6 +325,6 @@ router.put('/add-player', roomController.addPlayer);
  *                   description: Jugadores dentro de la sala de juego.
  *                   example: {}
  */
-router.put('/remove-player', roomController.removePlayer);
+router.post('/remove-player', roomController.removePlayer);
 
 module.exports = router;
