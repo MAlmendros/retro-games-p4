@@ -33,7 +33,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         const body = { roomId: userInfo.room.id, userId: userInfo.id };
     
         fetch('/api/rooms/remove-player', {
-            method: 'PUT',
+            method: 'POST',
             body: JSON.stringify(body),
             headers: new Headers({ 'Content-Type':  'application/json' })          
         })
@@ -74,7 +74,7 @@ document.getElementById('btn-leave').addEventListener('click', () => {
     const body = { roomId: userInfo.room.id, userId: userInfo.id };
 
     fetch('/api/rooms/remove-player', {
-        method: 'PUT',
+        method: 'POST',
         body: JSON.stringify(body),
         headers: new Headers({ 'Content-Type':  'application/json' })          
     })
@@ -143,7 +143,7 @@ function addPlayer(room) {
     const body = { roomId: room.id, userId: userInfo.id };
 
     fetch('/api/rooms/add-player', {
-        method: 'PUT',
+        method: 'POST',
         body: JSON.stringify(body),
         headers: new Headers({ 'Content-Type':  'application/json' })          
     })
