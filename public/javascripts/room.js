@@ -120,7 +120,7 @@ function conquerCell(cellId) {
     };
 
     fetch(`/api/games/${userInfo.room.id}/conquer-cell`, {
-        method: 'PUT',
+        method: 'POST',
         body: JSON.stringify(body),
         headers: new Headers({ 'Content-Type':  'application/json' }) 
     })

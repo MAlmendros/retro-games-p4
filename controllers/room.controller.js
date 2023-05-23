@@ -1,9 +1,6 @@
 const { Room } = require('../models/room.model');
 const { User } = require('../models/user.model');
 
-const { rooms } = require('../data/room.data');
-const { users } = require('../data/user.data');
-
 const createRoom = async(request, response) => {
     const body = request.body;
 
@@ -151,7 +148,7 @@ const deleteRoom = async(request, response) => {
             const players = users && users.length ? users : [];
             const deleteRoom = { ...room._doc, players };
 
-            await User.updateMany({ room: room.id }, { room: 0 }, { new: true });
+            await User.updateMany({ room: room.id }, { room: null }, { new: true });
             await Room.deleteOne({ id });
 
             response.status(200).json(deleteRoom);
@@ -249,7 +246,7 @@ const removePlayer = async(request, response) => {
             });
     } else {
         try {
-            await User.findOneAndUpdate({ id: userId }, { room: 0 }, { new: true });
+            await User.findOneAndUpdate({ id: userId }, { room: null }, { new: true });
 
             const users = await User.find({ room: room.id });
             const players = users && users.length ? users : [];

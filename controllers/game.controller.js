@@ -1,18 +1,20 @@
+const { Room } = require('../models/room.model');
+const { User } = require('../models/user.model');
 
+const { cells } = require('../data/cell.data');
 const { games } = require('../data/game.data');
-const { rooms } = require('../data/room.data');
 
 const createGame = async(request, response) => {
     const { roomId, userId } = request.body;
 
-    let selectedGame = games.find((game) => game.id === roomId);
+    const game = games.find((game) => game.id === roomId);
 
-    if (selectedGame) {
+    if (game) {
         response
             .status(404)
             .json({
                 status: 404,
-                message: `Ya existe un juego en la sala "${selectedGame.name}".`
+                message: `Ya existe un juego en la sala "${game.name}".`
             });
     } else if (!roomId || !userId) {
         response
@@ -22,17 +24,16 @@ const createGame = async(request, response) => {
                 message: `Ha ocurrido un error al crear el juego.`
             });
     } else {
-        const selectedRoom = rooms.find((room) => room.id === roomId);
+        const room = await Room.findOne({ id: roomId });
+        const user = await User.findOne({ id: userId });
 
         let newGame = {
-            id: selectedRoom.id,
-            name: selectedRoom.name,
+            id: room.id,
+            name: room.name,
             players: [{}, {}]
         };
 
-        const iPlayer = selectedRoom.players.findIndex((player) => player.id === userId);
-
-        if (iPlayer === -1) {
+        if (!user) {
             response
                 .status(404)
                 .json({
@@ -40,10 +41,15 @@ const createGame = async(request, response) => {
                     message: `El usuario no existe, revise sus credenciales.`
                 });
         } else {
+            const users = await User.find({ room: room.id });
+            const players = users && users.length ? users : [];
+
+            const iPlayer = players.findIndex((player) => player.id === userId);
+
             newGame.players[iPlayer] = {
-                id: selectedRoom.players[iPlayer].id,
-                username: selectedRoom.players[iPlayer].username,
-                avatar: selectedRoom.players[iPlayer].avatar,
+                id: players[iPlayer].id,
+                username: players[iPlayer].username,
+                avatar: players[iPlayer].avatar,
                 color: iPlayer === 0 ? '#007BFF' : '#DC3545',
                 cells: [],
                 score: 0
@@ -62,15 +68,14 @@ const getGames = async(request, response) => {
 
 const getGame = async(request, response) => {
     const gameId = request.params.id;
-
     const selectedGame = games.find((game) => game.id === parseInt(gameId));
 
     if (selectedGame) {
         response.status(200).json(selectedGame);
     } else {
-        const selectedRoom = rooms.find((room) => room.id === parseInt(gameId));
+        const room = await Room.findOne({ id: gameId });
 
-        if (selectedRoom) {
+        if (room) {
             response
                 .status(200)
                 .json({
@@ -92,7 +97,7 @@ const updateGame = async(request, response) => {
     const gameId = request.params.id;
     const { roomId, userId } = request.body;
 
-    let selectedGame = games.find((game) => game.id === parseInt(gameId));
+    const selectedGame = games.find((game) => game.id === parseInt(gameId));
 
     if (!selectedGame) {
         response
@@ -109,14 +114,17 @@ const updateGame = async(request, response) => {
                 message: `Los datos del juego están corruptos.`
             });
     } else {
-        const selectedRoom = rooms.find((room) => room.id === roomId);
+        const room = await Room.findOne({ id: roomId });
         let updateGame = selectedGame;
 
-        const iPlayer = selectedRoom.players.findIndex((player) => player.id === userId);
+        const users = await User.find({ room: roomId });
+        const players = users && users.length ? users : [];
+
+        const iPlayer = players.findIndex((player) => player.id === userId);
         updateGame.players[iPlayer] = {
-            id: selectedRoom.players[iPlayer].id,
-            username: selectedRoom.players[iPlayer].username,
-            avatar: selectedRoom.players[iPlayer].avatar,
+            id: players[iPlayer].id,
+            username: players[iPlayer].username,
+            avatar: players[iPlayer].avatar,
             color: iPlayer === 0 ? '#007BFF' : '#DC3545',
             cells: [],
             score: 0,
@@ -216,6 +224,7 @@ const conquerCell = async(request, response) => {
             const controlRival = selectedGame.players[iRival].cells.includes(cellId);
             const controlPlayer = selectedGame.players[iPlayer].cells.includes(cellId);
             const controlLength = selectedGame.players[iPlayer].cells.length === 0;
+
             let controlAdjacent = selectedGame.players[iPlayer].cells.filter((cell) => cells[`${cell}`].includes(cellId)).length;
             
             if (controlRival) {

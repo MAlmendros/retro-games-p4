@@ -1,3 +1,4 @@
+const { Room } = require('../models/room.model');
 const { User } = require('../models/user.model');
 
 const createUser = async(request, response) => {
@@ -31,7 +32,7 @@ const createUser = async(request, response) => {
                 email: body.email,
                 password: body.password,
                 avatar: body.avatar,
-                room: 0
+                room: null
             });
 
             await user.save();
@@ -48,8 +49,18 @@ const createUser = async(request, response) => {
 const getUsers = async(request, response) => {
     try {
         const users = await User.find();
+        let returnUsers = [];
 
-        response.status(200).json(users);
+        for (const user of users) {
+            if (user.room) {
+                const room = await Room.findOne({ id: user.room });
+                returnUsers.push({ ...user._doc, room });
+            } else {
+                returnUsers.push({ ...user._doc });
+            }
+        }
+
+        response.status(200).json(returnUsers);
     } catch (error) {
         response
             .status(404)
@@ -68,7 +79,13 @@ const getUser = async(request, response) => {
                 .status(404)
                 .json({ status: 404, message: `El usuario no existe.` });
         } else {
-            response.status(200).json(user);
+            if (user.room) {
+                const room = await Room.findOne({ id: user.room });
+
+                response.status(200).json({ ...user._doc, room });
+            } else {
+                response.status(200).json(user);
+            }
         }
     } catch (error) {
         response
@@ -99,15 +116,16 @@ const updateUser = async(request, response) => {
             });
     } else {
         try {
-            const updateValues = {
-                id,
-                ...body,
-                room: 0,
-            };
-
+            const updateValues = { id, ...body };
             const updateUser = await User.findOneAndUpdate({ id }, updateValues, { new: true });
             
-            response.status(200).json(updateUser);
+            if (updateUser.room) {
+                const room = await Room.findOne({ id: updateUser.room });
+
+                response.status(200).json({ ...updateUser._doc, room });
+            } else {
+                response.status(200).json(updateUser);
+            }
         } catch (error) {
             response
                 .status(404)
@@ -130,9 +148,16 @@ const deleteUser = async(request, response) => {
             })
     } else {
         try {
+            let deleteUser = { ...user._doc };
+
+            if (user.room) {
+                const room = await Room.findOne({ id: user.room });
+                deleteUser.room = room;
+            }
+
             await User.deleteOne({ id });
             
-            response.status(200).json(user);
+            response.status(200).json(deleteUser);
         } catch (error) {
             response
                 .status(404)
@@ -152,23 +177,29 @@ const login = async(request, response) => {
                 message: `Rellene todos los datos.`
             });
     } else {
-        const user = await User.findOne({ email: body.email, password: body.password });
+        try {
+            const user = await User.findOne({ email: body.email, password: body.password });
 
-        if (!user) {
-            response
-                .status(404)
-                .json({
-                    status: 404,
-                    message: `El usuario con correo electrónico "${body.email}" no existe o la contraseña es incorrecta.`
-                });
-        } else {
-            try {
-                response.status(200).json(user);
-            } catch (error) {
+            if (!user) {
                 response
                     .status(404)
-                    .json({ status: 404, message: `Ha ocurrido un error.` });
+                    .json({
+                        status: 404,
+                        message: `El usuario con correo electrónico "${body.email}" no existe o la contraseña es incorrecta.`
+                    });
+            } else {
+                if (user.room) {
+                    const room = await Room.findOne({ id: user.room });
+
+                    response.status(200).json({ ...user._doc, room });
+                } else {
+                    response.status(200).json(user);
+                }
             }
+        } catch (error) {
+            response
+                .status(404)
+                .json({ status: 404, message: `Ha ocurrido un error.` });
         }
     }
 }

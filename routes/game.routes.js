@@ -278,6 +278,6 @@ router.delete('/:id', gameController.deleteGame);
  *                   description: Posición del jugador que ha conquistado la celda.
  *                   example: 1
  */
-router.put('/:id/conquer-cell', gameController.conquerCell);
+router.post('/:id/conquer-cell', gameController.conquerCell);
 
 module.exports = router;
