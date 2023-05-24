@@ -32,7 +32,8 @@ const createUser = async(request, response) => {
                 email: body.email,
                 password: body.password,
                 avatar: body.avatar,
-                room: null
+                room: null,
+                roomIndex: -1
             });
 
             await user.save();

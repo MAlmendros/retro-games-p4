@@ -4,7 +4,6 @@ const { Room } = require('../models/room.model');
 const { User } = require('../models/user.model');
 
 const { cells } = require('../data/cell.data');
-const { games } = require('../data/game.data');
 
 const createGame = async(request, response) => {
     const { roomId, userId } = request.body;

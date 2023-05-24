@@ -213,7 +213,15 @@ socket.on('home', (rooms) => {
             let roomPlayers = '';
             let color = 'blue';
 
-            room.players.forEach(player => {
+            const players = room.players.sort(
+                (a, b) => (a.roomIndex > b.roomIndex)
+                    ? 1
+                    : (b.roomIndex > a.roomIndex) 
+                        ? -1
+                        : 0
+            );
+            
+            players.forEach(player => {
                 roomPlayers += '<div class="row mb-3">';
                 roomPlayers += '<div class="col-4">';
                 roomPlayers += '<img class="avatar-drag-img-' + color +'" draggable="false" height="auto" width="100%" src="/images/' + player.avatar + '.jpg">';

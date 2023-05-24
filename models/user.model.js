@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    roomIndex: {
+        type: Number,
+        required: false
+    }
 });
 
 const User = mongoose.model('User', UserSchema);

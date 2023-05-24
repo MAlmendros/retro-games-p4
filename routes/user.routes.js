@@ -60,6 +60,10 @@ var router = express.Router();
  *                   type: object
  *                   description: Sala de juego actual del usuario.
  *                   example: {}
+ *                 roomIndex:
+ *                   type: integer
+ *                   description: Posición que ocupa el usuario en la sala de juego.
+ *                   example: 1
  */
 router.post('/', userController.createUser);
 
@@ -101,6 +105,10 @@ router.post('/', userController.createUser);
  *                     type: object
  *                     description: Sala de juego actual del usuario.
  *                     example: {}
+ *                   roomIndex:
+ *                     type: integer
+ *                     description: Posición que ocupa el usuario en la sala de juego.
+ *                     example: 1
  */
 router.get('/', userController.getUsers);
 
@@ -147,6 +155,10 @@ router.get('/', userController.getUsers);
  *                   type: object
  *                   description: Sala de juego actual del usuario.
  *                   example: {}
+ *                 roomIndex:
+ *                   type: integer
+ *                   description: Posición que ocupa el usuario en la sala de juego.
+ *                   example: 1
  */
 router.get('/:id', userController.getUser);
 
@@ -212,6 +224,10 @@ router.get('/:id', userController.getUser);
  *                   type: object
  *                   description: Sala de juego actual del usuario.
  *                   example: {}
+ *                 roomIndex:
+ *                   type: integer
+ *                   description: Posición que ocupa el usuario en la sala de juego.
+ *                   example: 1
  */
 router.put('/:id', userController.updateUser);
 
@@ -258,6 +274,10 @@ router.put('/:id', userController.updateUser);
  *                   type: object
  *                   description: Sala de juego actual del usuario.
  *                   example: {}
+ *                 roomIndex:
+ *                   type: integer
+ *                   description: Posición que ocupa el usuario en la sala de juego.
+ *                   example: 1
  */
 router.delete('/:id', userController.deleteUser);
 
@@ -314,6 +334,10 @@ router.delete('/:id', userController.deleteUser);
  *                   type: object
  *                   description: Sala de juego actual del usuario.
  *                   example: {}
+ *                 roomIndex:
+ *                   type: integer
+ *                   description: Posición que ocupa el usuario en la sala de juego.
+ *                   example: 1
  */
 router.post('/login', userController.login);
 

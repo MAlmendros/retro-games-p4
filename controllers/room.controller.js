@@ -1,3 +1,4 @@
+const { Player } = require('../models/player.model');
 const { Room } = require('../models/room.model');
 const { User } = require('../models/user.model');
 
@@ -201,7 +202,12 @@ const addPlayer = async(request, response) => {
                     });
             } else {
                 try {
-                    await User.findOneAndUpdate({ id: userId }, { room: room.id }, { new: true });
+                    let roomIndex = 0;
+                    if (players.length > 0) {
+                        roomIndex = players[0].roomIndex === 0 ? 1 : 0;
+                    }
+
+                    await User.findOneAndUpdate({ id: userId }, { room: room.id, roomIndex }, { new: true });
 
                     users = await User.find({ room: room.id });
                     players = users && users.length ? users : [];
@@ -246,7 +252,8 @@ const removePlayer = async(request, response) => {
             });
     } else {
         try {
-            await User.findOneAndUpdate({ id: userId }, { room: null }, { new: true });
+            await User.findOneAndUpdate({ id: userId }, { room: null, roomIndex: -1 }, { new: true });
+            await Player.findOneAndUpdate({ id: userId }, { game: null }, { new: true });
 
             const users = await User.find({ room: room.id });
             const players = users && users.length ? users : [];
