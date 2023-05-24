@@ -144,22 +144,14 @@ router.get('/:id', gameController.getGame);
  *           schema:
  *             type: object
  *             properties:
- *               id:
+ *               roomId:
  *                 type: integer
- *                 description: ID del juego.
+ *                 description: ID de la sala de juego.
  *                 example: 1
- *               name:
- *                 type: string
- *                 description: Nombre del juego.
- *                 example: Juego 1
- *               playerA:
- *                 type: object
- *                 description: Información del primer jugador del juego.
- *                 example: {}
- *               playerB:
- *                 type: object
- *                 description: Información del segundo jugador del juego.
- *                 example: {}
+ *               userId:
+ *                 type: integer
+ *                 description: ID del usuario.
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Juego actualizado.
@@ -198,6 +190,17 @@ router.put('/:id', gameController.updateGame);
  *         description: ID del juego a borrar.
  *         schema:
  *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: ID del usuario.
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Juego borrado.
@@ -226,7 +229,7 @@ router.delete('/:id', gameController.deleteGame);
 /**
  * @swagger
  * /api/games/:id/conquer-cell:
- *   put:
+ *   post:
  *     tags:
  *       - Juegos
  *     summary: Conquistar una celda.
