@@ -69,17 +69,18 @@ const createGame = async(request, response) => {
                     id: players[iPlayer].id,
                     username: players[iPlayer].username,
                     avatar: players[iPlayer].avatar,
-                    color: iPlayer === 0 ? '#007BFF' : '#DC3545',
+                    color: players[iPlayer].roomIndex === 0 ? '#007BFF' : '#DC3545',
                     cells: [],
                     score: 0,
-                    game: game.id
+                    game: game.id,
+                    gameIndex: players[iPlayer].roomIndex
                 };
                 if (player) {
                     returnPlayer = await Player.findOneAndUpdate(
                         { id: userId }, valuesPlayer, { new: true }
                     );
                 } else {
-                    returnPlayer = new Player(returnPlayer);
+                    returnPlayer = new Player(valuesPlayer);
                     await returnPlayer.save();
                 }
     
@@ -187,10 +188,11 @@ const updateGame = async(request, response) => {
                 id: players[iPlayer].id,
                 username: players[iPlayer].username,
                 avatar: players[iPlayer].avatar,
-                color: iPlayer === 0 ? '#007BFF' : '#DC3545',
+                color: players[iPlayer].roomIndex === 0 ? '#007BFF' : '#DC3545',
                 cells: [],
                 score: 0,
-                game: game.id
+                game: game.id,
+                gameIndex: players[iPlayer].roomIndex
             };
 
             if (player) {
@@ -212,10 +214,11 @@ const updateGame = async(request, response) => {
                     id: players[iRival].id,
                     username: players[iRival].username,
                     avatar: players[iRival].avatar,
-                    color: iRival === 0 ? '#007BFF' : '#DC3545',
+                    color: players[iRival].roomIndex === 0 ? '#007BFF' : '#DC3545',
                     cells: [],
                     score: 0,
-                    game: game.id
+                    game: game.id,
+                    gameIndex: players[iRival].roomIndex
                 };
 
                 if (rival) {
@@ -289,7 +292,8 @@ const deleteGame = async(request, response) => {
                     color: players[iRival].color,
                     cells: [],
                     score: 0,
-                    game: players[iRival].game
+                    game: players[iRival].game,
+                    gameIndex: players[iRival].gameIndex
                 };
 
                 returnRival = await Player.findOneAndUpdate(
@@ -380,7 +384,7 @@ const conquerCell = async(request, response) => {
                     .json({
                         game: { ...game._doc, players: returnPlayers },
                         cellId,
-                        iPlayer
+                        iPlayer: returnPlayer.gameIndex
                     });
             }
         }

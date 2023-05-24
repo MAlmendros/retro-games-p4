@@ -216,9 +216,7 @@ socket.on('home', (rooms) => {
             const players = room.players.sort(
                 (a, b) => (a.roomIndex > b.roomIndex)
                     ? 1
-                    : (b.roomIndex > a.roomIndex) 
-                        ? -1
-                        : 0
+                    : 0
             );
             
             players.forEach(player => {

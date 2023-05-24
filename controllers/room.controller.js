@@ -253,7 +253,7 @@ const removePlayer = async(request, response) => {
     } else {
         try {
             await User.findOneAndUpdate({ id: userId }, { room: null, roomIndex: -1 }, { new: true });
-            await Player.findOneAndUpdate({ id: userId }, { game: null }, { new: true });
+            await Player.findOneAndUpdate({ id: userId }, { game: null, gameIndex: -1 }, { new: true });
 
             const users = await User.find({ room: room.id });
             const players = users && users.length ? users : [];

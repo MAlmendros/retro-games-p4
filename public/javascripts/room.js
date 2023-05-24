@@ -167,9 +167,20 @@ socket.on(`start-${userInfo.room.id}`, (game) => {
     roomPlayerScore[0].innerHTML = `0 (0%)`;
     roomPlayerScore[1].innerHTML = `0 (0%)`;
 
-    if (game && game.players && game.players[0].id) {
-        roomPlayerName[0].innerHTML = game.players[0].username;
-        document.getElementById('avatar-0').setAttribute('src', '/images/' + game.players[0].avatar + '.jpg');
+    let players = [];
+    if (game && game.players) {
+        players = game.players.sort(
+            (a, b) => (a.roomIndex > b.roomIndex)
+                ? 1
+                : (b.roomIndex > a.roomIndex) 
+                    ? -1
+                    : 0
+        );
+    }
+
+    if (game && players && players[0].id) {
+        roomPlayerName[0].innerHTML = players[0].username;
+        document.getElementById('avatar-0').setAttribute('src', '/images/' + players[0].avatar + '.jpg');
         roomPlayer[0].classList.remove('d-none');
         playersCount++;
     } else {
@@ -177,9 +188,9 @@ socket.on(`start-${userInfo.room.id}`, (game) => {
         document.getElementById('avatar-0').setAttribute('src', '/images/avatar-0.jpg');
     }
 
-    if (game && game.players && game.players[1].id) {
-        roomPlayerName[1].innerHTML = game.players[1].username;
-        document.getElementById('avatar-1').setAttribute('src', '/images/' + game.players[1].avatar + '.jpg');
+    if (game && players && players[1].id) {
+        roomPlayerName[1].innerHTML = players[1].username;
+        document.getElementById('avatar-1').setAttribute('src', '/images/' + players[1].avatar + '.jpg');
         roomPlayer[1].classList.remove('d-none');
         playersCount++;
     } else {

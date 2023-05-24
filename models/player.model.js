@@ -29,6 +29,10 @@ const PlayerSchema = new mongoose.Schema({
     game: {
         type: Number,
         required: false
+    },
+    gameIndex: {
+        type: Number,
+        required: false
     }
 });
 
