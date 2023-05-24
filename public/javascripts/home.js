@@ -214,10 +214,7 @@ socket.on('home', (rooms) => {
             let color = 'blue';
 
             const players = room.players.sort(
-                (a, b) => (a.roomIndex > b.roomIndex)
-                    ? 1
-                    : 0
-            );
+                (a, b) => a.roomIndex - b.roomIndex);
             
             players.forEach(player => {
                 roomPlayers += '<div class="row mb-3">';

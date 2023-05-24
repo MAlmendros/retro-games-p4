@@ -303,7 +303,7 @@ const deleteGame = async(request, response) => {
                 response.status(200).json({
                     status: 200,
                     code: 'LEAVE',
-                    game: { ...game._doc, returnPlayers }
+                    game: { ...game._doc, players: returnPlayers }
                 });
             }
         }

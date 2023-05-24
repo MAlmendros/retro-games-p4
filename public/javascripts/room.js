@@ -167,20 +167,17 @@ socket.on(`start-${userInfo.room.id}`, (game) => {
     roomPlayerScore[0].innerHTML = `0 (0%)`;
     roomPlayerScore[1].innerHTML = `0 (0%)`;
 
-    let players = [];
+    let playerA = null;
+    let playerB = null;
+
     if (game && game.players) {
-        players = game.players.sort(
-            (a, b) => (a.roomIndex > b.roomIndex)
-                ? 1
-                : (b.roomIndex > a.roomIndex) 
-                    ? -1
-                    : 0
-        );
+        playerA = game.players.find((player) => player.gameIndex === 0);
+        playerB = game.players.find((player) => player.gameIndex === 1);
     }
 
-    if (game && players && players[0].id) {
-        roomPlayerName[0].innerHTML = players[0].username;
-        document.getElementById('avatar-0').setAttribute('src', '/images/' + players[0].avatar + '.jpg');
+    if (playerA) {
+        roomPlayerName[0].innerHTML = playerA.username;
+        document.getElementById('avatar-0').setAttribute('src', '/images/' + playerA.avatar + '.jpg');
         roomPlayer[0].classList.remove('d-none');
         playersCount++;
     } else {
@@ -188,9 +185,9 @@ socket.on(`start-${userInfo.room.id}`, (game) => {
         document.getElementById('avatar-0').setAttribute('src', '/images/avatar-0.jpg');
     }
 
-    if (game && players && players[1].id) {
-        roomPlayerName[1].innerHTML = players[1].username;
-        document.getElementById('avatar-1').setAttribute('src', '/images/' + players[1].avatar + '.jpg');
+    if (playerB) {
+        roomPlayerName[1].innerHTML = playerB.username;
+        document.getElementById('avatar-1').setAttribute('src', '/images/' + playerB.avatar + '.jpg');
         roomPlayer[1].classList.remove('d-none');
         playersCount++;
     } else {
@@ -227,7 +224,7 @@ socket.on(`start-${userInfo.room.id}`, (game) => {
 
 socket.on(`game-${userInfo.room.id}`, (info) => {
     const { game, cellId, iPlayer } = info;
-    const player = game.players[iPlayer];
+    const player = game.players.find((player) => player.gameIndex === iPlayer);
 
     const canvas = canvasList[cellId - 1];
     let context = canvas.getContext('2d');
@@ -236,15 +233,18 @@ socket.on(`game-${userInfo.room.id}`, (info) => {
 
     roomPlayerScore[iPlayer].innerHTML = `${player.score} (${player.score * 4}%)`;
 
-    const scores = game.players.map((player) => player.score);
-    const totalScore = scores[0] + scores[1];
+    const playerA = game.players.find((player) => player.gameIndex === 0);
+    const playerB = game.players.find((player) => player.gameIndex === 1);
+
+    const totalScore = playerA.score + playerB.score;
 
     if (totalScore === 25) {
-        const index = scores[0] > scores[1] ? 0 : 1;
-        const color = index === 0 ? 'blue' : 'red';
-        const winner = game.players[index];
+        const index = playerA.score > playerB.score ? playerA.gameIndex : playerB.gameIndex;
+        const winner = index === playerA.gameIndex ? playerA.username : playerB.username;
+        const colorHex = index === playerA.gameIndex ? playerA.color : playerB.color;
+        const color = colorHex === '#007BFF' ? 'blue' : 'red';
 
-        roomPlayerInfo.innerHTML = `¡El juego ha finalizado! Ganador: <span class='score-${color}'>${winner.username}</span>.`;
+        roomPlayerInfo.innerHTML = `¡El juego ha finalizado! Ganador: <span class='score-${color}'>${winner}</span>.`;
         roomButtonLeave.classList.remove('d-none');
     }
 });
