@@ -35,7 +35,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         fetch('/api/rooms/remove-player', {
             method: 'POST',
             body: JSON.stringify(body),
-            headers: new Headers({ 'Content-Type':  'application/json' })          
+            headers: new Headers({ 'Content-Type': 'application/json' })          
         })
         .then(data => data.json()) 
         .then(response => {
@@ -76,7 +76,7 @@ document.getElementById('btn-leave').addEventListener('click', () => {
     fetch('/api/rooms/remove-player', {
         method: 'POST',
         body: JSON.stringify(body),
-        headers: new Headers({ 'Content-Type':  'application/json' })          
+        headers: new Headers({ 'Content-Type': 'application/json' })          
     })
     .then(data => data.json()) 
     .then(response => {
@@ -114,7 +114,7 @@ function drop(event, roomId) {
 
     fetch(`/api/rooms/${roomId}`, {
         method: 'GET',
-        headers: new Headers({ 'Content-Type':  'application/json' })          
+        headers: new Headers({ 'Content-Type': 'application/json' })          
     })
     .then(data => data.json()) 
     .then(response => {
@@ -145,7 +145,7 @@ function addPlayer(room) {
     fetch('/api/rooms/add-player', {
         method: 'POST',
         body: JSON.stringify(body),
-        headers: new Headers({ 'Content-Type':  'application/json' })          
+        headers: new Headers({ 'Content-Type': 'application/json' })          
     })
     .then(data => data.json()) 
     .then(response => {
@@ -177,7 +177,7 @@ function getRooms() {
 
     fetch('/api/rooms', {
         method: 'GET',
-        headers: new Headers({ 'Content-Type':  'application/json' })          
+        headers: new Headers({ 'Content-Type': 'application/json' })          
     })
     .then(data => data.json()) 
     .then(response => {

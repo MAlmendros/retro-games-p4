@@ -50,7 +50,7 @@ registerForm.addEventListener('submit', (event) => {
         fetch('/api/users', {
             method: 'POST',
             body: JSON.stringify(body),
-            headers: new Headers({ 'Content-Type':  'application/json' })          
+            headers: new Headers({ 'Content-Type': 'application/json' })          
         })
         .then(data => data.json()) 
         .then(response => {

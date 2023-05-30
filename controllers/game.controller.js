@@ -8,7 +8,7 @@ const { cells } = require('../data/cell.data');
 const createGame = async(request, response) => {
     const { roomId, userId } = request.body;
 
-    const selectedGame = await Game.findOne({ id: roomId });
+    const selectedGame = await Game.findOne({ id: roomId, active: true });
 
     if (selectedGame) {
         response
@@ -53,7 +53,8 @@ const createGame = async(request, response) => {
             try {
                 let game = new Game({
                     id: room.id,
-                    name: room.name
+                    name: room.name,
+                    active: true
                 });
                 let returnPlayers = [{}, {}];
     
@@ -61,7 +62,7 @@ const createGame = async(request, response) => {
     
                 const users = await User.find({ room: room.id });
                 const players = users && users.length ? users : [];
-                const player = await Player.findOne({ id: userId });
+                const player = await Player.findOne({ id: userId, gameCode: game._id, active: true });
                 const iPlayer = players.findIndex((player) => player.id === userId);
     
                 let returnPlayer = {};
@@ -73,11 +74,13 @@ const createGame = async(request, response) => {
                     cells: [],
                     score: 0,
                     game: game.id,
-                    gameIndex: players[iPlayer].roomIndex
+                    gameCode: game._id,
+                    gameIndex: players[iPlayer].roomIndex,
+                    active: true
                 };
                 if (player) {
                     returnPlayer = await Player.findOneAndUpdate(
-                        { id: userId }, valuesPlayer, { new: true }
+                        { id: userId, gameCode: game._id, active: true }, valuesPlayer, { new: true }
                     );
                 } else {
                     returnPlayer = new Player(valuesPlayer);
@@ -102,7 +105,7 @@ const getGames = async(request, response) => {
         let returnGames = [];
 
         for (const game of games) {
-            const players = await Player.find({ game: game.id });
+            const players = await Player.find({ game: game.id, gameCode: game._id, active: true });
             const returnPlayers = players && players.length ? players : [];
             returnGames.push({ ...game._doc, players: returnPlayers });
         }
@@ -119,10 +122,10 @@ const getGame = async(request, response) => {
     const id = request.params.id;
 
     try {
-        const game = await Game.findOne({ id });
+        const game = await Game.findOne({ id, active: true });
 
         if (game) {
-            const players = await Player.find({ game: game.id });
+            const players = await Player.find({ game: game.id, gameCode: game._id, active: true });
             const returnPlayers = players && players.length ? players : [];
 
             response.status(200).json({ ...game._doc, players: returnPlayers });
@@ -156,7 +159,7 @@ const updateGame = async(request, response) => {
     const id = request.params.id;
     const { roomId, userId } = request.body;
 
-    const game = await Game.findOne({ id });
+    const game = await Game.findOne({ id, active: true });
 
     if (!game) {
         response
@@ -180,7 +183,7 @@ const updateGame = async(request, response) => {
             const players = users && users.length ? users : [];
             const iPlayer = players.findIndex((player) => player.id === userId);
             const iRival = players.findIndex((player) => player.id !== userId);
-            const player = await Player.findOne({ id: userId });
+            const player = await Player.findOne({ id: userId, gameCode: game._id, active: true });
     
             let returnPlayer = {};
 
@@ -192,12 +195,14 @@ const updateGame = async(request, response) => {
                 cells: [],
                 score: 0,
                 game: game.id,
-                gameIndex: players[iPlayer].roomIndex
+                gameCode: game._id,
+                gameIndex: players[iPlayer].roomIndex,
+                active: true
             };
 
             if (player) {
                 returnPlayer = await Player.findOneAndUpdate(
-                    { id: userId }, valuesPlayer, { new: true }
+                    { id: userId, gameCode: game._id, active: true }, valuesPlayer, { new: true }
                 );
             } else {
                 returnPlayer = new Player(valuesPlayer);
@@ -207,7 +212,7 @@ const updateGame = async(request, response) => {
             returnPlayers[iPlayer] = returnPlayer;
     
             if (iRival !== -1 ) {
-                const rival = await Player.findOne({ id: players[iRival].id });
+                const rival = await Player.findOne({ id: players[iRival].id, gameCode: game._id, active: true });
 
                 let returnRival = {};
                 const valuesRival = {
@@ -218,12 +223,14 @@ const updateGame = async(request, response) => {
                     cells: [],
                     score: 0,
                     game: game.id,
-                    gameIndex: players[iRival].roomIndex
+                    gameCode: game._id,
+                    gameIndex: players[iRival].roomIndex,
+                    active: true
                 };
 
                 if (rival) {
                     returnRival = await Player.findOneAndUpdate(
-                        { id: players[iRival].id }, valuesRival, { new: true }
+                        { id: players[iRival].id, gameCode: game._id, active: true }, valuesRival, { new: true }
                     );
                 } else {
                     returnRival = new Player(valuesRival);
@@ -246,7 +253,7 @@ const deleteGame = async(request, response) => {
     const id = request.params.id;
     const { userId } = request.body;
 
-    const game = await Game.findOne({ id });
+    const game = await Game.findOne({ id, active: true });
 
     if (!game) {
         response
@@ -256,7 +263,7 @@ const deleteGame = async(request, response) => {
                 message: `No existe ningún juego en curso en esa sala de juego.`
             });
     } else {
-        const players = await Player.find({ game: game.id });
+        const players = await Player.find({ game: game.id, gameCode: game._id, active: true });
         const iPlayer = players.findIndex((player) => player.id === userId);
         const iRival = players.findIndex((player) => player.id !== userId);
 
@@ -271,11 +278,16 @@ const deleteGame = async(request, response) => {
                     message: `El jugador no se encuentra en esta sala de juego.`
                 });
         } else {
-            await Player.deleteOne({ id: players[iPlayer].id });
+            // await Player.delZeteOne({ id: players[iPlayer].id });
+            await Player.findOneAndUpdate(
+                { id: players[iPlayer].id, gameCode: game._id, active: true }, { active: false }, { new: true }
+            );
+
             returnPlayers[iPlayer] = {};
 
             if (iRival === -1) {
-                await Game.deleteOne({ id });
+                // await Game.delZeteOne({ id });
+                await Game.findOneAndUpdate({ id, active: true }, { active: false }, { new: true });
 
                 response.status(200).json({
                     status: 200,
@@ -284,21 +296,6 @@ const deleteGame = async(request, response) => {
                 });
             } else {
                 returnPlayers[iRival] = players[iRival];
-
-                const valuesRival = {
-                    id: players[iRival].id,
-                    username: players[iRival].username,
-                    avatar: players[iRival].avatar,
-                    color: players[iRival].color,
-                    cells: [],
-                    score: 0,
-                    game: players[iRival].game,
-                    gameIndex: players[iRival].gameIndex
-                };
-
-                returnRival = await Player.findOneAndUpdate(
-                    { id: players[iRival].id }, valuesRival, { new: true }
-                );
 
                 response.status(200).json({
                     status: 200,
@@ -315,7 +312,7 @@ const conquerCell = async(request, response) => {
     const id = request.params.id;
     const { userId, cellId } = request.body;
 
-    const game = await Game.findOne({ id });
+    const game = await Game.findOne({ id, active: true });
 
     if (!game) {
         response
@@ -325,7 +322,7 @@ const conquerCell = async(request, response) => {
                 message: `No existe ningún juego en curso en esa sala de juego.`
             });
     } else {
-        let player = await Player.findOne({ id: userId });
+        let player = await Player.findOne({ id: userId, gameCode: game._id, active: true });
 
         if (!player) {
             response
@@ -335,7 +332,7 @@ const conquerCell = async(request, response) => {
                     message: `El jugador no ha sido encontrado en la sala de juego.`
                 });
         } else {
-            const players = await Player.find({ game: game.id });
+            const players = await Player.find({ game: game.id, gameCode: game._id, active: true });
             const iPlayer = players.findIndex((player) => player.id === userId);
             const iRival = players.findIndex((player) => player.id !== userId);
 
@@ -372,7 +369,7 @@ const conquerCell = async(request, response) => {
                     score: player.score + 1
                 }
                 const returnPlayer = await Player.findOneAndUpdate(
-                    { id: player.id }, valuesPlayer, { new: true }
+                    { id: player.id, gameCode: game._id, active: true }, valuesPlayer, { new: true }
                 );
 
                 const returnPlayers = [{}, {}];

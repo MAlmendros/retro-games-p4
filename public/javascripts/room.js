@@ -41,7 +41,7 @@ canvasList.forEach((canvas, index) => {
 function checkGame(userInfo) {
     fetch(`/api/games/${userInfo.room.id}`, {
         method: 'GET',
-        headers: new Headers({ 'Content-Type':  'application/json' })          
+        headers: new Headers({ 'Content-Type': 'application/json' })          
     })
     .then(data => data.json()) 
     .then(response => {
@@ -70,7 +70,7 @@ function createGame(userInfo) {
     fetch('/api/games', {
         method: 'POST',
         body: JSON.stringify(body),
-        headers: new Headers({ 'Content-Type':  'application/json' }) 
+        headers: new Headers({ 'Content-Type': 'application/json' }) 
     })
     .then(data => data.json()) 
     .then(response => {
@@ -95,7 +95,7 @@ function updateGame(userInfo) {
     fetch(`/api/games/${userInfo.room.id}`, {
         method: 'PUT',
         body: JSON.stringify(body),
-        headers: new Headers({ 'Content-Type':  'application/json' }) 
+        headers: new Headers({ 'Content-Type': 'application/json' }) 
     })
     .then(data => data.json()) 
     .then(response => {
@@ -122,7 +122,7 @@ function conquerCell(cellId) {
     fetch(`/api/games/${userInfo.room.id}/conquer-cell`, {
         method: 'POST',
         body: JSON.stringify(body),
-        headers: new Headers({ 'Content-Type':  'application/json' }) 
+        headers: new Headers({ 'Content-Type': 'application/json' }) 
     })
     .then(data => data.json()) 
     .then(response => {
@@ -143,7 +143,7 @@ document.getElementById('btn-leave').addEventListener('click', () => {
     fetch(`/api/games/${gameId}`, {
         method: 'DELETE',
         body: JSON.stringify(body),
-        headers: new Headers({ 'Content-Type':  'application/json' })          
+        headers: new Headers({ 'Content-Type': 'application/json' })          
     })
     .then(data => data.json()) 
     .then(response => {

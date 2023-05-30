@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const PlayerSchema = new mongoose.Schema({
     id: {
         type: Number,
-        required: true,
-        unique: true
+        required: true
     },
     username: {
         type: String,
@@ -30,8 +29,16 @@ const PlayerSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    gameCode: {
+        type: String,
+        required: true
+    },
     gameIndex: {
         type: Number,
+        required: false
+    },
+    active: {
+        type: Boolean,
         required: false
     }
 });
